@@ -19,7 +19,7 @@ export function render(urlParams) {
     const notes = curHistoryItem?.notes ?? '';
     const container = module.htmlToElement(`
         <div>
-            <a href="index.html" id="link" class="nav-link">${i18n.Home}</a>
+            <a href="." id="link" class="nav-link">${i18n.Home}</a>
             <p class="lead">${exercise.name}</p>
             <p><textarea id="notes" class="form-control form-control-lg" rows="10">${notes}</textarea></p>
             <p class="lead">${i18n.Period}: ${exercise.period}</p>

@@ -12,7 +12,7 @@ export function render() {
         })
         .sort((a, b) => (Date.now() - b.lastExecuted) / b.period - (Date.now() - a.lastExecuted) / a.period)
         .map(exercise => {
-            const url = `index.html?exercise=${exercise.name}`
+            const url = `?exercise=${exercise.name}`
             const oneDay = 24 * 60 * 60 * 1000;
             const daysPassed = Math.trunc((Date.now() - exercise.lastExecuted) / oneDay);
             return `
@@ -30,8 +30,8 @@ export function render() {
 
     const container = module.htmlToElement(`
         <nav class="navbar">
-            <a class="nav-link" aria-current="page" href="index.html" id="link">${i18n.Refresh}</a>
-            <a class="nav-link" href="index.html?edit" id="link">${i18n.EditData}</a>
+            <a class="nav-link" aria-current="page" href="." id="link">${i18n.Refresh}</a>
+            <a class="nav-link" href="?edit" id="link">${i18n.EditData}</a>
         </nav>
         ${links}
         <div class="row mb-2 g-0 flex-nowrap">

@@ -12,7 +12,7 @@ export function render(urlParams) {
     }
     const container = module.htmlToElement(`
         <div>
-            <a href="index.html" id="link" class="nav-link">${i18n.Home}</a>
+            <a href="." id="link" class="nav-link">${i18n.Home}</a>
             <p class="lead">${i18n.EditData}</p>
             <p><textarea id="notes" class="form-control" rows="20">${localStorage.getItem('exercises')}</textarea></p>
         </div>
