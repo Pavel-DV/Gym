@@ -7,30 +7,33 @@ import { findExercise } from './module.js';
 export function render() {
     const links = module.getExercises().sort((a, b) => (Date.now() - b.lastExecuted) / b.period - (Date.now() - a.lastExecuted) / a.period).map(exercise => {
         const url = `index.html?exercise=${exercise.name}`
-        const oneDay = 24 * 60 * 60 * 1000 / 12;
+        const oneDay = 24 * 60 * 60 * 1000;
         return `
-            <a href="${url}" id="exercise-link" class="list-group-item list-group-item-action" data-name="${exercise.name}">
-                ${new Date(exercise.lastExecuted).toLocaleDateString()}
-                ${~~((Date.now() - exercise.lastExecuted) / oneDay)}
-                ${exercise.name}
-            </a>
+            <div class="row mb-2 g-0">
+                <a href="${url}" id="exercise-link" class="btn col-11" data-name="${exercise.name}" style="text-align: left;">
+                    ${new Date(exercise.lastExecuted).toLocaleDateString()}
+                    ${~~((Date.now() - exercise.lastExecuted) / oneDay)}
+                    ${exercise.name}
+                </a>
+                <button class="btn col-1" id="edit">⚙</button>
+            </div>
         `;
     }).join('\n');
 
     const container = module.htmlToElement(`
         <a href="index.html?edit" id="link" class="nav-link">${i18n.EditData}</a>
-        <div class="list-group list-group-flush">
+        <div>
             ${links}
         </div>
-        <div oncontextmenu="alert(1)" contextmenu="mymenu">contextmenu</div>
     `);
 
-    container.forEach(node => node.querySelectorAll ? node.querySelectorAll('a#exercise-link').forEach(link => link.oncontextmenu = oncontextmenu) : null);
+    container.forEach(node => node.querySelectorAll ? node.querySelectorAll('a#exercise-link').forEach(link => link.oncontextmenu = edit) : null);
+    container.forEach(node => node.querySelectorAll ? node.querySelectorAll('button#edit').forEach(btn => btn.onclick = edit) : null);
 
     return container;
 }
 
-function oncontextmenu(e) {
+function edit(e) {
 
     const exerciseName = e.target.dataset.name;
     const exercise = findExercise(exerciseName);
