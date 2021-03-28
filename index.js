@@ -15,7 +15,7 @@ export function render() {
                     ${~~((Date.now() - exercise.lastExecuted) / oneDay)}
                     ${exercise.name}
                 </a>
-                <button class="btn col-1" id="edit">⚙</button>
+                <button class="btn btn-primary col-1 p-0" id="edit">⚙</button>
             </div>
         `;
     }).join('\n');
@@ -27,7 +27,6 @@ export function render() {
         </div>
     `);
 
-    container.forEach(node => node.querySelectorAll ? node.querySelectorAll('a#exercise-link').forEach(link => link.oncontextmenu = edit) : null);
     container.forEach(node => node.querySelectorAll ? node.querySelectorAll('button#edit').forEach(btn => btn.onclick = edit) : null);
 
     return container;
@@ -41,10 +40,6 @@ function edit(e) {
     const editContainer = module.htmlToElement(`
         <div class="container">
 
-            <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">Period</span>
-                <input type="range" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-            </div>
             <div class="row g-2">
                 <label for="customRange1" class="form-label col-sm-1">Period</label>
                 <div class="col-sm-11">
@@ -60,16 +55,19 @@ function edit(e) {
               </div>
               <div class="col-md-2">
                 <div class="form-floating">
-                  <input type="number" class="form-control mb-2" placeholder="Period" value="7" id="Period">
+                  <input type="number" pattern="[0-9]*" inputmode="numeric" class="form-control mb-2" placeholder="Period" value="7" id="Period">
                   <label for="Period">Period</label>
                 </div>
               </div>
+              
               <div class="col-md-1">
-                  <a href="index.html" class="btn btn-primary">Ok</a>
+                  <a href="index.html" class="btn btn-primary" id="link">Ok</a>
               </div>
             </div>
         </div>
     `);
+
+    editContainer.querySelector('a#link').onclick = module.linkClick;
 
     e.target.parentNode.replaceChildren(editContainer);
 

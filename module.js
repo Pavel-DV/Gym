@@ -35,7 +35,7 @@ export function updateRoute() {
     document.querySelectorAll('a#link, a#exercise-link').forEach(link => link.onclick = linkClick);
 }
 
-function linkClick(e) {
+export function linkClick(e) {
     e.preventDefault();
     window.history.pushState({}, `${i18n.Gym}`, e.target.href);
 }
