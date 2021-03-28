@@ -9,7 +9,7 @@ export function render() {
         const url = `index.html?exercise=${exercise.name}`
         const oneDay = 24 * 60 * 60 * 1000;
         return `
-            <div class="row mb-2 g-0">
+            <div class="row mb-2 g-0 flex-nowrap">
                 <a href="${url}" id="exercise-link" class="btn col-11" data-name="${exercise.name}" style="text-align: left;">
                     ${new Date(exercise.lastExecuted).toLocaleDateString()}
                     ${~~((Date.now() - exercise.lastExecuted) / oneDay)}
