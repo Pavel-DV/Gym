@@ -39,3 +39,9 @@ export function linkClick(e) {
     e.preventDefault();
     window.history.pushState({}, `${i18n.Gym}`, e.target.href);
 }
+
+export function updateExercise(exercise, updatedData) {
+    const newExercise = { ...exercise, ...updatedData };
+    const newExercises = [ ...getExercises().filter(item => item.name !== exercise.name), newExercise ];
+    localStorage.setItem('exercises', JSON.stringify(newExercises, null, 2));
+}

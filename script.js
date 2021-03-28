@@ -13,19 +13,6 @@ window.onpopstate = function (event) {
     module.updateRoute();
 }
 
-
-// const defaultExercises = [
-//     { lastExecuted: 0, period: 7, history: [], name: 'Жим в тренажере' },
-//     { lastExecuted: 0, period: 7, history: [], name: 'Бицепс' },
-//     { lastExecuted: 0, period: 7, history: [], name: 'Подтягивание' },
-//     { lastExecuted: 0, period: 7, history: [], name: 'Трицепс' },
-//     { lastExecuted: 0, period: 14, history: [], name: 'Наклоны назад' },
-//     { lastExecuted: 0, period: 14, history: [], name: 'Приседания' },
-//     { lastExecuted: 0, period: 14, history: [], name: 'Икры' },
-// ];
-// const savedExercises = JSON.parse(localStorage.getItem('exercises') || '[]');
-// const joinedExercises = replaceExercisesByName(defaultExercises, savedExercises);
-// localStorage.setItem('exercises', JSON.stringify(joinedExercises));
-// function replaceExercisesByName(exercises, changes) {
-//     return exercises.map(exercise => ({ ...exercise, ...changes.find(change => change.name === exercise.name) }));
-// }
+const def = `
+[{"period":7,"name":"Жим штанги лежа"},{"period":7,"name":"Бицепс"},{"period":7,"name":"Подтягивание"},{"period":7,"name":"Трицепс"},{"period":14,"name":"Приседания"},{"period":14,"name":"Икры"}]
+`;

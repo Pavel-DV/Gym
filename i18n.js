@@ -17,10 +17,17 @@ export const i18n = Object.fromEntries([
         },
     },
     {
+        name: 'Refresh',
+        translates: {
+            en: 'Refresh',
+            ru: 'Обновить',
+        },
+    },
+    {
         name: 'EditData',
         translates: {
-            en: 'Data Edit',
-            ru: 'Редактирование данных',
+            en: 'Data',
+            ru: 'Исходные данные',
         },
     },
     {
@@ -42,6 +49,20 @@ export const i18n = Object.fromEntries([
         translates: {
             en: 'Period (days)',
             ru: 'Периодичность (дней)',
+        },
+    },
+    {
+        name: 'daysAgo',
+        translates: {
+            en: 'd. ago',
+            ru: 'д. назад',
+        },
+    },
+    {
+        name: 'Add',
+        translates: {
+            en: 'Add New',
+            ru: 'Добавить новое',
         },
     },
 ].map(function (string) {
