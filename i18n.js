@@ -1,6 +1,6 @@
 'use strict';
 
-const lang = navigator.language === 'en-US' ? 'en' : 'ru';
+const lang = (navigator.language === 'en-US' || navigator.language === 'en-us') ? 'en' : 'ru';
 
 export const i18n = Object.fromEntries([
     {

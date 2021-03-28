@@ -37,7 +37,6 @@ export function render() {
         <div class="row mb-2 g-0 flex-nowrap">
             <button class="btn btn-primary col-6 p-0" id="new">${i18n.Add}</button>
         </div>
-        ${navigator.language}
     `);
 
     const nodes = Array.from(container).filter(node => node.querySelectorAll);
