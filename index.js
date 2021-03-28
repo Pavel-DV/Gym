@@ -22,6 +22,7 @@ export function render() {
         <div class="list-group list-group-flush">
             ${links}
         </div>
+        <div oncontextmenu="alert(1)" contextmenu="mymenu">contextmenu</div>
     `);
 
     container.forEach(node => node.querySelectorAll ? node.querySelectorAll('a#exercise-link').forEach(link => link.oncontextmenu = oncontextmenu) : null);
