@@ -71,7 +71,7 @@ function edit(e) {
         </div>
     `);
 
-    e.target.parentNode.replaceChild(editContainer, e.target);
+    e.target.parentNode.replaceChildren(editContainer);
 
     // const isDelete = confirm(`${i18n.Delete}?`);
     // if (isDelete) {
