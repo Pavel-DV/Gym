@@ -17,7 +17,7 @@ export function render() {
             const daysPassed = Math.trunc((Date.now() - exercise.lastExecuted) / oneDay);
             return `
             <div class="row mb-2 g-0 flex-nowrap">
-                <a href="${url}" id="exercise-link" class="btn col-11" data-name="${exercise.name}" style="text-align: left;">
+                <a href="${url}" id="exercise-link" class="btn btn-light col-11" data-name="${exercise.name}" style="text-align: left;">
                     ${daysPassed > 99 ? '--' : daysPassed}
                     / ${exercise.period}
                     ${exercise.name}
@@ -31,7 +31,6 @@ export function render() {
     const container = module.htmlToElement(`
         <nav class="navbar">
             <a class="nav-link" aria-current="page" href="." id="link">${i18n.Refresh}</a>
-            <a class="nav-link" href="?edit" id="link">${i18n.EditData}</a>
         </nav>
         ${links}
         <div class="row mb-2 g-0 flex-nowrap">
