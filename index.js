@@ -38,15 +38,29 @@ export function render() {
         </div>
     `);
 
-    const nodes = Array.from(container).filter(node => node.querySelectorAll);
-    nodes.forEach(node => node.querySelectorAll('button#edit').forEach(btn => btn.onclick = (e) => edit(e, module.findExercise(e.target.dataset.name))));
-    nodes.forEach(node => node.querySelectorAll('button#new').forEach(btn => btn.onclick = (e) => edit(e, {name: '', period: ''})));
+    Array.from(container)
+        .filter(node => node.querySelectorAll)
+        .forEach(node => {
+            node.querySelectorAll('button#edit')
+                .forEach(btn => btn.onclick = e => edit(e.target.parentNode, module.findExercise(e.target.dataset.name)))
+            node.querySelectorAll('button#new')
+                .forEach(btn => btn.onclick = e => addNew(e.target.parentNode))
+        });
 
     return container;
 }
 
-function edit(e, exercise) {
-    const editContainer = module.htmlToElement(`
+function addNew(referenceNode) {
+    const emptyDiv = module.htmlToElement(`
+        <div class="row mb-2 g-0 flex-nowrap">
+        </div>
+    `);
+    referenceNode.parentNode.insertBefore(emptyDiv, referenceNode);
+    edit(emptyDiv, { name: '', period: '' });
+}
+
+function edit(parentNode, exercise) {
+    const container = module.htmlToElement(`
         <div class="container">
             <div class="row g-1">
                 <div class="col-9">
@@ -62,11 +76,11 @@ function edit(e, exercise) {
         </div>
     `);
 
-    editContainer.querySelector('button#delete').onclick = () => deleteExercise(exercise);
-    editContainer.querySelector('input#name').oninput = (e) => updateName(exercise, e.target.value);
-    editContainer.querySelector('input#period').oninput = (e) => updatePeriod(exercise, e.target.value);
+    container.querySelector('button#delete').onclick = () => deleteExercise(exercise);
+    container.querySelector('input#name').oninput = (e) => updateName(exercise, e.target.value);
+    container.querySelector('input#period').oninput = (e) => updatePeriod(exercise, e.target.value);
 
-    e.target.parentNode.replaceChildren(editContainer);
+    parentNode.replaceChildren(container);
 }
 
 function updateName(exercise, name) {
