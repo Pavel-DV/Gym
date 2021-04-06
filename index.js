@@ -18,7 +18,6 @@ export function render() {
             return `
                 <a href="${url}" id="exercise-link" class="btn btn-light col-12 mb-2" data-name="${exercise.name}" style="text-align: left;">
                     ${daysPassed > 99 ? '--' : daysPassed}
-                    / ${exercise.period}
                     ${exercise.name}
                 </a>
             `;
