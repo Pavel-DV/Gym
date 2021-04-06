@@ -10,7 +10,7 @@ export function getExercises() {
 }
 
 export function findExercise(name) {
-    return getExercises().find(exercise => exercise.name === name);
+    return getExercises().find(exercise => exercise.name === name) || { name: '', period: 7 };
 }
 
 export function htmlToElement(html) {
@@ -40,8 +40,9 @@ export function linkClick(e) {
     window.history.pushState({}, `${i18n.Gym}`, e.target.href);
 }
 
-export function updateExercise(exercise, updatedData) {
+export function updateExercise(name, updatedData) {
+    const exercise = findExercise(name);
     const newExercise = { ...exercise, ...updatedData };
-    const newExercises = [ ...getExercises().filter(item => item.name !== exercise.name), newExercise ];
+    const newExercises = [ ...getExercises().filter(item => item.name !== name), newExercise ];
     localStorage.setItem('exercises', JSON.stringify(newExercises, null, 2));
 }
