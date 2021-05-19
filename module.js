@@ -42,13 +42,10 @@ export function updateRoute() {
     } else if (isEdit) {
         mainBlock.replaceChildren(...edit.render(urlParams));
     } else if (urlParams.has('save')) {
-        const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(localStorage.getItem('exercises')));
-        element.setAttribute('download', 'gym backup.txt');
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
+        saveDataToFile();
+        window.history.back();
+    } else if (urlParams.has('load')) {
+        loadDataFromFile();
         window.history.back();
     } else {
         window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
@@ -93,3 +90,31 @@ export function arraySplitLast(arr) {
     const last = arr.slice(-1)[0];
     return [ firsts, last ];
 }
+
+function saveDataToFile() {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(localStorage.getItem('exercises')));
+    element.setAttribute('download', 'gym backup.txt');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
+function loadDataFromFile() {
+    document.getElementById('files').click();
+}
+
+function handleFileSelect(evt) {
+    Array.from(evt.target.files).map(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            localStorage.setItem('exercises', JSON.stringify(JSON.parse(e.target.result), null, 2));
+            window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
+        };
+        reader.readAsText(file);
+    });
+    evt.target.value = null;
+}
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);

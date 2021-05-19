@@ -25,14 +25,16 @@ export default function navBar(exercisePath) {
     ].join('');
 
     return module.htmlToElement(`
-        <nav>
+        <nav style="display: flex;justify-content: space-between;">
             <ol class="breadcrumb">
                 ${pathsHtml}
             </ol>
 
-            <a href="?save" id="link">💾</a>
-            <a href="?open" id="link">📂</a>
-            <a href="?edit" id="link">✎</a>
+            <span>
+                <a href="?save" id="link">💾</a>
+                <a href="?load" id="link">📂</a>
+                <a href="?edit" id="link">✎</a>
+            </span>
         </nav>
     `);
 }
