@@ -2,7 +2,7 @@
 
 const lang = (navigator.language === 'en-US' || navigator.language === 'en-us') ? 'en' : 'ru';
 
-export const i18n = Object.fromEntries([
+const i18n = Object.fromEntries([
     {
         name: 'Gym', translates: {
             en: 'Gym',
@@ -68,3 +68,7 @@ export const i18n = Object.fromEntries([
 ].map(function (string) {
     return [ string.name, string.translates[this] ]
 }, lang));
+
+export default function (word) {
+    return i18n[word];
+}

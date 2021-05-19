@@ -1,0 +1,10 @@
+// 'use strict';
+//
+// import * as module from './module.js';
+// import buttonAdd from './buttonAdd.js';
+// import list from './list.js';
+//
+// export function render() {
+//     const storedExercises = module.getStoredExercises();
+//     return [ ...list(storedExercises), ...buttonAdd(storedExercises, [], '', storedExercises) ];
+// }

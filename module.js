@@ -1,35 +1,65 @@
 'use strict';
 
 import * as exercise from './exercise.js';
-import * as index from './index.js';
+// import * as index from './index.js';
 import * as edit from './edit.js';
-import { i18n } from './i18n.js';
+import i18n from './i18n.js';
 
-export function getExercises() {
-    return JSON.parse(localStorage.getItem('exercises') || '[]');
+export function getStoredExercises() {
+    const exercises = JSON.parse(localStorage.getItem('exercises') || '[]')
+    return exercises;
+    // return [{
+    //     'period': 14,
+    //     'history': [],
+    //     'name': '',
+    //     exercises,
+    // }];
 }
 
-export function findExercise(name) {
-    return getExercises().find(exercise => exercise.name === name) || { name: '', period: 7 };
+export function findExercise(exercises, namesChain) {
+    return namesChain.reduce(findNextExercise, { exercises });
+}
+
+function findNextExercise(acc, name) {
+    return acc.exercises?.find(exercise => exercise.name === name)
+        || { name: '', period: 7 };
 }
 
 export function htmlToElement(html) {
     const template = document.createElement('template');
     template.innerHTML = html.trim();
-    return template.content.childNodes.length > 1 ? template.content.childNodes : template.content.firstChild;
+    return [ ...template.content.childNodes ];
 }
 
 export function updateRoute() {
+    const oldActiveElement = document.activeElement;
     const mainBlock = document.getElementById('main');
     const urlParams = new URLSearchParams(window.location.search)
     const isExercise = urlParams.has('exercise');
     const isEdit = urlParams.has('edit');
     if (isExercise) {
-        mainBlock.replaceChildren(exercise.render(urlParams));
+        mainBlock.replaceChildren(...exercise.render(urlParams));
     } else if (isEdit) {
-        mainBlock.replaceChildren(edit.render(urlParams));
+        mainBlock.replaceChildren(...edit.render(urlParams));
+    } else if (urlParams.has('save')) {
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(localStorage.getItem('exercises')));
+        element.setAttribute('download', 'gym backup.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        window.history.back();
     } else {
-        mainBlock.replaceChildren(...index.render());
+        window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
+
+        // mainBlock.replaceChildren(...index.render());
+    }
+
+    const newActiveElement = document.getElementById(oldActiveElement.id);
+    if (newActiveElement?.setSelectionRange) {
+        newActiveElement.focus();
+        newActiveElement.setSelectionRange(oldActiveElement.selectionStart, oldActiveElement.selectionEnd);
     }
 
     document.querySelectorAll('a#link, a#exercise-link').forEach(link => link.onclick = linkClick);
@@ -37,12 +67,29 @@ export function updateRoute() {
 
 export function linkClick(e) {
     e.preventDefault();
-    window.history.pushState({}, `${i18n.Gym}`, e.target.href);
+    window.history.pushState({}, `${i18n('Gym')}`, e.target.href);
 }
 
-export function updateExercise(name, updatedData) {
-    const exercise = findExercise(name);
-    const newExercise = { ...exercise, ...updatedData };
-    const newExercises = [ ...getExercises().filter(item => item.name !== name), newExercise ];
+export function updateExercise(storedExercises, namesChain, updatedData) {
+    const newExercises = deepChange(storedExercises, namesChain, updatedData);
     localStorage.setItem('exercises', JSON.stringify(newExercises, null, 2));
+}
+
+function deepChange(storedExercises, namesChain, updatedData) {
+    const [ curName, ...newNamesChain ] = namesChain;
+    return storedExercises.map(storedExercise =>
+        storedExercise.name !== curName
+            ? storedExercise
+            : (
+                newNamesChain.length === 0
+                    ? { ...storedExercise, ...updatedData }
+                    : { ...storedExercise, exercises: deepChange(storedExercise.exercises, newNamesChain, updatedData) }
+            ),
+    ).filter(exercise => exercise.isDelete !== true);
+}
+
+export function arraySplitLast(arr) {
+    const firsts = arr.slice(0, -1);
+    const last = arr.slice(-1)[0];
+    return [ firsts, last ];
 }
