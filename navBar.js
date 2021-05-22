@@ -31,9 +31,9 @@ export default function navBar(exercisePath) {
             </ol>
 
             <span>
-                <a href="?save" id="link">💾</a>
-                <a href="?load" id="link">📂</a>
-                <a href="?edit" id="link">✎</a>
+                <a href="?save" id="link" style="text-decoration: none;">💾⭳⤓</a>
+                <a href="?load" id="link" style="text-decoration: none;">📂</a>
+                <a href="?edit" id="link" style="text-decoration: none;">✎</a>
             </span>
         </nav>
     `);
