@@ -22,8 +22,9 @@ export function render(urlParams) {
             <div class="list-group-item">
                 ${new Date(item.timestamp).toLocaleString()},
                 ${~~((Date.now() - item.timestamp) / oneDay)} ${i18n('daysAgo')}
-                <br>
-                ${item.notes.split('\n').join('<br>')}
+                <p>
+                    ${item.notes.split('\n').join('<br>')}
+                </p>
             </div>
         `).join('')
     const notes = curHistoryItem?.notes ?? '';
