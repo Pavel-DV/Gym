@@ -8,16 +8,18 @@ import buttonAdd from './buttonAdd.js';
 
 export function render(urlParams) {
     const exercisePath = urlParams.get('exercise');
-    const namesChain = exercisePath.split('/');
-    const storedExercises = module.getStoredExercises()
-    const exercise = module.findExercise(storedExercises, namesChain);
+    window.state.storedItems = module.getStoredItems();
+    window.state.namesChain = exercisePath.split('/');
+    const exercise = module.findExercise(window.state.storedItems, window.state.namesChain);
     // const childExercises = exercisePath ? exercise.exercises ?? [] : storedExercises;
     const childExercises = exercise.exercises || [];
     const oneDay = 24 * 60 * 60 * 1000;
     const history = exercise.history || [];
     const curHistoryItem = history.sort((a, b) => b.timestamp - a.timestamp)
         .find(item => item.timestamp > Date.now() - oneDay);
+
     const pastHistory = history.filter(item => item.timestamp !== curHistoryItem?.timestamp)
+
     const historyHtml = pastHistory.map(item => `
             <div class="list-group-item">
                 ${new Date(item.timestamp).toLocaleString()},
@@ -27,6 +29,7 @@ export function render(urlParams) {
                 </p>
             </div>
         `).join('')
+
     const notes = curHistoryItem?.notes ?? '';
 
     const container = module.htmlToElement(`
@@ -51,32 +54,45 @@ export function render(urlParams) {
             <div class="list-group list-group-flush">${historyHtml}</div>
         </div>
     `);
+
     container.forEach(node => {
-        node.querySelector('#notes').oninput = (e) =>
-            updateText(storedExercises, namesChain, pastHistory, e.target.value);
-        node.querySelector('input#name').oninput = e =>
-            updateName(storedExercises, namesChain, e.target.value);
-        node.querySelector('button#delete').onclick = () => deleteExercise(storedExercises, namesChain, exercise);
-        node.querySelector('input#period').oninput = e => updatePeriod(storedExercises, namesChain, e.target.value);
+        node.querySelector('#notes').oninput = (e) => {
+            window.state.storedItems = updateHistory(window.state.storedItems, window.state.namesChain, pastHistory, e.target.value);
+        }
+
+        node.querySelector('input#name').oninput = e => {
+            const { updatedItems, updatedNamesChain } = updateName(window.state.storedItems, window.state.namesChain, e.target.value);
+            window.state.storedItems = updatedItems;
+            window.state.namesChain = updatedNamesChain;
+        }
+
+        node.querySelector('button#delete').onclick = () => deleteItem(window.state.storedItems, window.state.namesChain, exercise);
+
+        node.querySelector('input#period').oninput = e => {
+            window.state.storedItems = updatePeriod(window.state.storedItems, window.state.namesChain, e.target.value);
+        }
     });
 
     const listContainer = list(childExercises, exercisePath);
 
-    return [ ...navBar(exercisePath), ...listContainer, ...buttonAdd(storedExercises, namesChain, exercisePath, childExercises), ...container ];
+    return [ ...navBar(exercisePath), ...listContainer, ...buttonAdd(childExercises), ...container ];
 }
 
-function updateName(storedExercises, namesChain, name) {
-    module.updateExercise(storedExercises, namesChain, { name });
+function updateName(storedItems, namesChain, name) {
+    const updatedItems = module.updateItem(storedItems, namesChain, { name });
     // exercise.name = name;
     const [ firstPaths ] = module.arraySplitLast(namesChain);
-    window.history.replaceState({}, `${i18n('Gym')}`, `?exercise=${firstPaths.map(name => encodeURI(name)).join('/')}/${encodeURI(name)}`);
+    const updatedNamesChain = [ ...firstPaths, name ];
+    window.history.replaceState({}, `${i18n('Gym')}`, `?exercise=${updatedNamesChain.map(encodeURI).join('/')}`);
+
+    return { updatedItems, updatedNamesChain };
 }
 
-function updatePeriod(storedExercises, namesChain, period) {
-    module.updateExercise(storedExercises, namesChain, { period });
+function updatePeriod(storedItems, namesChain, period) {
+    return module.updateItem(storedItems, namesChain, { period });
 }
 
-function updateText(storedExercises, namesChain, pastHistory, notes) {
+function updateHistory(storedItems, namesChain, pastHistory, notes) {
     const history = [
         ...pastHistory,
         {
@@ -85,13 +101,13 @@ function updateText(storedExercises, namesChain, pastHistory, notes) {
         },
     ];
 
-    module.updateExercise(storedExercises, namesChain, { history });
+    return module.updateItem(storedItems, namesChain, { history });
 }
 
-function deleteExercise(storedExercises, namesChain, exercise) {
+function deleteItem(storedExercises, namesChain, exercise) {
     const isDelete = confirm(`${i18n('Delete')} ${exercise.name}?`);
     if (isDelete) {
-        module.updateExercise(storedExercises, namesChain, { isDelete: true });
+        module.updateItem(storedExercises, namesChain, { isDelete: true });
         window.history.back();
     }
 }

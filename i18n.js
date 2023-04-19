@@ -13,7 +13,7 @@ const i18n = Object.fromEntries([
         name: 'Home',
         translates: {
             en: 'Home',
-            ru: 'В начало',
+            ru: 'Начало',
         },
     },
     {
@@ -40,8 +40,8 @@ const i18n = Object.fromEntries([
     {
         name: 'ExerciseName',
         translates: {
-            en: 'Exercise name',
-            ru: 'Название упражнения',
+            en: 'Name',
+            ru: 'Название',
         },
     },
     {
@@ -61,8 +61,8 @@ const i18n = Object.fromEntries([
     {
         name: 'Add',
         translates: {
-            en: 'Add New',
-            ru: 'Добавить новое',
+            en: 'Add',
+            ru: 'Добавить',
         },
     },
 ].map(function (string) {

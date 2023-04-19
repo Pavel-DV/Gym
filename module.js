@@ -1,34 +1,74 @@
 'use strict';
 
 import * as exercise from './exercise.js';
-// import * as index from './index.js';
 import * as edit from './edit.js';
 import i18n from './i18n.js';
 
-export function getStoredExercises() {
-    const exercises = JSON.parse(localStorage.getItem('exercises') || '[]')
-    return exercises;
-    // return [{
-    //     'period': 14,
-    //     'history': [],
-    //     'name': '',
-    //     exercises,
-    // }];
+const version = 1;
+
+export const defaultItem = {
+    exercises: [],
+    history: [],
+    name: '',
+    period: 7,
+};
+
+export function getStoredItems() {
+    const data = JSON.parse(localStorage.getItem('exercises') || '[]');
+    return migrateData(data).items;
+}
+
+function migrateData(data) {
+    const result = {};
+
+    if (data.version === undefined) {
+        result.items = migrateRecursively(data, migrate_1);
+        result.version = 1;
+    } else {
+        result.items = data.items;
+        result.version = data.version;
+    }
+
+    return result;
+}
+
+function migrate_1(item) {
+    const newItem = {...defaultItem, ...item};
+    newItem.period = Number(newItem.period);
+
+    return newItem;
+}
+
+function migrateRecursively(items, migrationFunc) {
+    return items.map(item => {
+        const newItem = migrationFunc(item);
+        newItem.exercises = migrateRecursively(newItem.exercises, migrationFunc);
+
+        return newItem;
+    });
+}
+
+export function saveItems(items) {
+    const data = {
+        version,
+        items,
+    }
+
+    localStorage.setItem('exercises', JSON.stringify(data, null, 2));
 }
 
 export function findExercise(exercises, namesChain) {
-    return namesChain.reduce(findNextExercise, { exercises });
+    return namesChain.reduce(findNextExercise, {exercises});
 }
 
 function findNextExercise(acc, name) {
-    return acc.exercises?.find(exercise => exercise.name === name)
-        || { name: '', period: 7 };
+    return acc.exercises?.find(exercise => exercise.name === name) || defaultItem;
 }
 
 export function htmlToElement(html) {
     const template = document.createElement('template');
     template.innerHTML = html.trim();
-    return [ ...template.content.childNodes ];
+    return [...template.content.childNodes];
 }
 
 export function updateRoute() {
@@ -45,8 +85,10 @@ export function updateRoute() {
         saveDataToFile();
         window.history.back();
     } else if (urlParams.has('load')) {
-        loadDataFromFile();
-        window.history.back();
+        loadDataFromFile().then(data => {
+            saveItems(migrateData(JSON.parse(data)).items);
+            window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
+        });
     } else {
         window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
 
@@ -67,33 +109,36 @@ export function linkClick(e) {
     window.history.pushState({}, `${i18n('Gym')}`, e.target.href);
 }
 
-export function updateExercise(storedExercises, namesChain, updatedData) {
-    const newExercises = deepChange(storedExercises, namesChain, updatedData);
-    localStorage.setItem('exercises', JSON.stringify(newExercises, null, 2));
+export function updateItem(storedItems, namesChain, updatedData) {
+    const updatedItems = deepChange(storedItems, namesChain, updatedData);
+    saveItems(updatedItems);
+
+    return updatedItems;
 }
 
 function deepChange(storedExercises, namesChain, updatedData) {
-    const [ curName, ...newNamesChain ] = namesChain;
-    return storedExercises.map(storedExercise =>
-        storedExercise.name !== curName
-            ? storedExercise
-            : (
-                newNamesChain.length === 0
-                    ? { ...storedExercise, ...updatedData }
-                    : { ...storedExercise, exercises: deepChange(storedExercise.exercises, newNamesChain, updatedData) }
-            ),
-    ).filter(exercise => exercise.isDelete !== true);
+    const [curName, ...newNamesChain] = namesChain;
+
+    return sortItems(storedExercises).map(storedExercise => {
+        if (storedExercise.name !== curName) {
+            return storedExercise;
+        } else {
+            return newNamesChain.length === 0
+                    ? {...storedExercise, ...updatedData}
+                    : {...storedExercise, exercises: deepChange(storedExercise.exercises, newNamesChain, updatedData)}
+        }
+    }).filter(exercise => exercise.isDelete !== true);
 }
 
 export function arraySplitLast(arr) {
     const firsts = arr.slice(0, -1);
     const last = arr.slice(-1)[0];
-    return [ firsts, last ];
+    return [firsts, last];
 }
 
 function saveDataToFile() {
     const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(localStorage.getItem('exercises')));
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(getStoredItems()));
     element.setAttribute('download', 'gym backup.txt');
     element.style.display = 'none';
     document.body.appendChild(element);
@@ -101,20 +146,41 @@ function saveDataToFile() {
     document.body.removeChild(element);
 }
 
-function loadDataFromFile() {
-    document.getElementById('files').click();
-}
-
-function handleFileSelect(evt) {
+const handleFileSelect = resolve => evt => {
     Array.from(evt.target.files).map(file => {
         const reader = new FileReader();
-        reader.onload = e => {
-            localStorage.setItem('exercises', JSON.stringify(JSON.parse(e.target.result), null, 2));
-            window.history.pushState({}, `${i18n('Gym')}`, `?exercise=`);
-        };
         reader.readAsText(file);
+
+        reader.onload = e => {
+            resolve(e.target.result);
+        };
     });
+
     evt.target.value = null;
 }
 
-document.getElementById('files').addEventListener('change', handleFileSelect, false);
+async function loadDataFromFile() {
+    document.getElementById('files').click();
+
+    return new Promise(resolve => {
+        document.getElementById('files').onchange = handleFileSelect(resolve);
+    })
+}
+
+function addLastDate(items) {
+    return items.map(item => {
+        const lastDate = getLastDateRecursive(item);
+        return {...item, lastDate: lastDate < 0 ? 0 : lastDate};
+    });
+}
+
+function getLastDateRecursive(item) {
+    const lastDateFromNested = item.exercises.map(getLastDateRecursive);
+    return Math.max(...item.history.map(item => item.timestamp), ...lastDateFromNested);
+}
+
+export function sortItems(items) {
+    const updatedItems = addLastDate(items);
+    return updatedItems.sort((a, b) => (Date.now() - b.lastDate) / b.period - (Date.now() - a.lastDate) / a.period)
+}
+
