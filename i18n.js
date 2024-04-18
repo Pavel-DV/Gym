@@ -45,6 +45,13 @@ const i18n = Object.fromEntries([
         },
     },
     {
+        name: 'ExerciseNotes',
+        translates: {
+            en: 'Notes',
+            ru: 'Заметки',
+        },
+    },
+    {
         name: 'Period',
         translates: {
             en: 'Period (days)',

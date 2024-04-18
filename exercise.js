@@ -1,22 +1,22 @@
-'use strict';
+'use strict'
 
-import * as module from './module.js';
-import i18n from './i18n.js';
-import navBar from './navBar.js';
-import list from './list.js';
-import buttonAdd from './buttonAdd.js';
+import * as module from './module.js'
+import i18n from './i18n.js'
+import navBar from './navBar.js'
+import list from './list.js'
+import buttonAdd from './buttonAdd.js'
 
 export function render(urlParams) {
-    const exercisePath = urlParams.get('exercise');
-    window.state.storedItems = module.getStoredItems();
-    window.state.namesChain = exercisePath.split('/');
-    const exercise = module.findExercise(window.state.storedItems, window.state.namesChain);
+    const exercisePath = urlParams.get('exercise')
+    window.state.storedItems = module.getStoredItems()
+    window.state.namesChain = exercisePath.split('/')
+    const exercise = module.findExercise(window.state.storedItems, window.state.namesChain)
     // const childExercises = exercisePath ? exercise.exercises ?? [] : storedExercises;
-    const childExercises = exercise.exercises || [];
-    const oneDay = 24 * 60 * 60 * 1000;
-    const history = exercise.history || [];
+    const childExercises = exercise.exercises || []
+    const oneDay = 24 * 60 * 60 * 1000
+    const history = exercise.history || []
     const curHistoryItem = history.sort((a, b) => b.timestamp - a.timestamp)
-        .find(item => item.timestamp > Date.now() - oneDay);
+    .find(item => item.timestamp > Date.now() - oneDay)
 
     const pastHistory = history.filter(item => item.timestamp !== curHistoryItem?.timestamp)
 
@@ -30,13 +30,13 @@ export function render(urlParams) {
             </div>
         `).join('')
 
-    const notes = curHistoryItem?.notes ?? '';
+    const notes = curHistoryItem?.notes ?? ''
+    const nameInput = exercisePath === '' ? '' : `<input class="form-control mb-2" placeholder="${i18n('ExerciseName')}" value="${exercise.name}" id="name">`
 
     const container = module.htmlToElement(`
         <div>
-            <input class="form-control mb-2" placeholder="${i18n('ExerciseName')}" value="${exercise.name}"
-                id="name">
-            <p><textarea id="notes" class="form-control form-control-lg" rows="10">${notes}</textarea></p>
+            ${nameInput}
+            <p><textarea id="notes" placeholder="${i18n('ExerciseNotes')}" class="form-control form-control-lg" rows="10">${notes}</textarea></p>
             <div class="row g-1 mb-2">
                 <div class="col-5 lead">
                     ${i18n('Period')}:
@@ -53,43 +53,51 @@ export function render(urlParams) {
             </div-->
             <div class="list-group list-group-flush">${historyHtml}</div>
         </div>
-    `);
+    `)
 
     container.forEach(node => {
         node.querySelector('#notes').oninput = (e) => {
-            window.state.storedItems = updateHistory(window.state.storedItems, window.state.namesChain, pastHistory, e.target.value);
+            window.state.storedItems = updateHistory(window.state.storedItems, window.state.namesChain, pastHistory, e.target.value)
         }
 
-        node.querySelector('input#name').oninput = e => {
-            const { updatedItems, updatedNamesChain } = updateName(window.state.storedItems, window.state.namesChain, e.target.value);
-            window.state.storedItems = updatedItems;
-            window.state.namesChain = updatedNamesChain;
+        const inputName = node.querySelector('input#name')
+
+        if (inputName !== null) {
+            inputName.oninput = e => {
+                const {
+                    updatedItems,
+                    updatedNamesChain
+                } = updateName(window.state.storedItems, window.state.namesChain, e.target.value)
+                window.state.storedItems = updatedItems
+                window.state.namesChain = updatedNamesChain
+            }
         }
 
-        node.querySelector('button#delete').onclick = () => deleteItem(window.state.storedItems, window.state.namesChain, exercise);
+
+        node.querySelector('button#delete').onclick = () => deleteItem(window.state.storedItems, window.state.namesChain, exercise)
 
         node.querySelector('input#period').oninput = e => {
-            window.state.storedItems = updatePeriod(window.state.storedItems, window.state.namesChain, e.target.value);
+            window.state.storedItems = updatePeriod(window.state.storedItems, window.state.namesChain, e.target.value)
         }
-    });
+    })
 
-    const listContainer = list(childExercises, exercisePath);
+    const listContainer = list(childExercises, exercisePath)
 
-    return [ ...navBar(exercisePath), ...listContainer, ...buttonAdd(childExercises), ...container ];
+    return [ ...navBar(exercisePath), ...listContainer, ...container, ...buttonAdd(childExercises) ]
 }
 
 function updateName(storedItems, namesChain, name) {
-    const updatedItems = module.updateItem(storedItems, namesChain, { name });
+    const updatedItems = module.updateItem(storedItems, namesChain, { name })
     // exercise.name = name;
-    const [ firstPaths ] = module.arraySplitLast(namesChain);
-    const updatedNamesChain = [ ...firstPaths, name ];
-    window.history.replaceState({}, `${i18n('Gym')}`, `?exercise=${updatedNamesChain.map(encodeURI).join('/')}`);
+    const [ firstPaths ] = module.arraySplitLast(namesChain)
+    const updatedNamesChain = [ ...firstPaths, name ]
+    window.history.replaceState({}, `${i18n('Gym')}`, `?exercise=${updatedNamesChain.map(encodeURI).join('/')}`)
 
-    return { updatedItems, updatedNamesChain };
+    return { updatedItems, updatedNamesChain }
 }
 
 function updatePeriod(storedItems, namesChain, period) {
-    return module.updateItem(storedItems, namesChain, { period });
+    return module.updateItem(storedItems, namesChain, { period })
 }
 
 function updateHistory(storedItems, namesChain, pastHistory, notes) {
@@ -99,15 +107,15 @@ function updateHistory(storedItems, namesChain, pastHistory, notes) {
             notes,
             timestamp: Date.now(),
         },
-    ];
+    ]
 
-    return module.updateItem(storedItems, namesChain, { history });
+    return module.updateItem(storedItems, namesChain, { history })
 }
 
 function deleteItem(storedExercises, namesChain, exercise) {
-    const isDelete = confirm(`${i18n('Delete')} ${exercise.name}?`);
+    const isDelete = confirm(`${i18n('Delete')} ${exercise.name}?`)
     if (isDelete) {
-        module.updateItem(storedExercises, namesChain, { isDelete: true });
-        window.history.back();
+        module.updateItem(storedExercises, namesChain, { isDelete: true })
+        window.history.back()
     }
 }
